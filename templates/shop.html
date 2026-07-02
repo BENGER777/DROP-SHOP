@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Магазин</h1>
+    
+    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+        <div class="flex space-x-2">
+            <a href="/shop{% if search_query %}?q={{ search_query }}{% endif %}" 
+               class="px-4 py-2 rounded-lg {% if current_filter == 'all' %}bg-[var(--accent)]{% else %}bg-gray-800{% endif %} transition">
+                Все
+            </a>
+            <a href="/shop?type=original{% if search_query %}&q={{ search_query }}{% endif %}" 
+               class="px-4 py-2 rounded-lg {% if current_filter == 'original' %}bg-yellow-600{% else %}bg-gray-800{% endif %} transition">
+                Оригинал
+            </a>
+            <a href="/shop?type=replica{% if search_query %}&q={{ search_query }}{% endif %}" 
+               class="px-4 py-2 rounded-lg {% if current_filter == 'replica' %}bg-green-600{% else %}bg-gray-800{% endif %} transition">
+                Реплика
+            </a>
+        </div>
+        
+        <form method="GET" action="/shop" class="flex-1 flex flex-wrap gap-2" id="search-form">
+            {% if current_filter != 'all' %}
+            <input type="hidden" name="type" value="{{ current_filter }}">
+            {% endif %}
+            <div class="relative flex-1 min-w-[200px]">
+                <input type="text" name="q" value="{{ search_query }}" 
+                       placeholder="Поиск по товарам..." 
+                       class="w-full bg-[var(--card-bg)] border border-[var(--border)] rounded-lg px-4 py-3 pl-10 focus:border-[var(--accent)] outline-none transition"
+                       hx-get="/shop"
+                       hx-trigger="keyup changed delay:300ms"
+                       hx-target="#products-grid"
+                       hx-include="#search-form"
+                       hx-swap="innerHTML">
+                <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+            </div>
+            <input type="number" name="price_min" placeholder="Цена от" value="{{ price_min }}" 
+                   class="w-24 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg px-3 py-3 focus:border-[var(--accent)] outline-none transition"
+                   hx-get="/shop"
+                   hx-trigger="keyup changed delay:300ms"
+                   hx-target="#products-grid"
+                   hx-include="#search-form"
+                   hx-swap="innerHTML">
+            <input type="number" name="price_max" placeholder="Цена до" value="{{ price_max }}" 
+                   class="w-24 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg px-3 py-3 focus:border-[var(--accent)] outline-none transition"
+                   hx-get="/shop"
+                   hx-trigger="keyup changed delay:300ms"
+                   hx-target="#products-grid"
+                   hx-include="#search-form"
+                   hx-swap="innerHTML">
+            <button type="submit" class="bg-[var(--accent)] px-6 py-3 rounded-lg font-bold neon-btn">Найти</button>
+        </form>
+    </div>
+    
+    {% if search_query %}
+    <p class="text-gray-400 mb-4">Результаты: "{{ search_query }}" ({{ products|length }})</p>
+    {% endif %}
+    
+    <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% if products %}
+            {% for product in products %}
+            <div class="card-hover rounded-2xl overflow-hidden" style="background: var(--card-bg); border: 1px solid var(--border);">
+                {% if product.video_url %}
+                <video src="{{ product.video_url }}" autoplay loop muted playsinline class="w-full h-48 object-cover"></video>
+                {% elif product.image_url %}
+                <img src="{{ product.image_url }}" class="w-full h-48 object-cover">
+                {% else %}
+                <div class="h-48 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-6xl">
+                    {{ '👟' if 'кроссовк' in product.name.lower() or 'jordan' in product.name.lower() else '👕' }}
+                </div>
+                {% endif %}
+                <div class="p-4">
+                    <span class="text-xs px-2 py-1 rounded-full {% if product.type == 'original' %}bg-yellow-600{% else %}bg-green-600{% endif %}">
+                        {{ product.type }}
+                    </span>
+                    <h3 class="font-bold mt-2">{{ product.name }}</h3>
+                    {% if product.review_count > 0 %}
+                    <div class="flex items-center mt-1 text-sm">
+                        <div class="flex text-yellow-400">
+                            {% for i in range(5) %}
+                                {% if i < product.avg_rating|round(0, 'floor') %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-gray-500 ml-1">({{ product.review_count }})</span>
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-gray-500 mt-1">Нет отзывов</p>
+                    {% endif %}
+                    
+                    <!-- Цена с учётом акции -->
+                    {% if product.id in promos_active %}
+                    <p class="mt-2">
+                        <span class="text-lg font-black line-through opacity-50">{{ product.price }} ₽</span>
+                        <span class="text-2xl font-black gradient-text ml-2">{{ (product.price * (1 - promos_active[product.id].discount_percent/100))|round(0) }} ₽</span>
+                        <span class="text-xs text-[var(--accent)] ml-1">-{{ promos_active[product.id].discount_percent }}%</span>
+                    </p>
+                    {% else %}
+                    <p class="text-2xl font-black mt-2">{{ product.price }} ₽</p>
+                    {% endif %}
+                    
+                    <p class="text-sm text-gray-400 mt-1">{{ product.description[:60] }}...</p>
+                    <div class="flex space-x-2 mt-4">
+                        <a href="/add_to_cart/{{ product.id }}" 
+                           class="flex-1 bg-gray-700 text-center py-2 rounded-lg text-sm hover:bg-gray-600 transition"
+                           @click="$dispatch('cart-added')">🛒</a>
+                        <a href="/wishlist/add/{{ product.id }}" class="flex-1 bg-gray-700 text-center py-2 rounded-lg text-sm hover:bg-gray-600 transition">❤️</a>
+                        <a href="/product/{{ product.id }}" class="flex-1 bg-gray-800 text-center py-2 rounded-lg text-sm hover:bg-gray-700 transition">Подробнее</a>
+                        <a href="/group/start/{{ product.id }}" class="flex-1 bg-[var(--accent)] text-center py-2 rounded-lg text-sm neon-btn">Групповая</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-full text-center py-20">
+                <p class="text-6xl mb-4">🔍</p>
+                <p class="text-2xl font-bold">Ничего не найдено</p>
+                <p class="text-gray-400 mt-2">Попробуйте изменить запрос</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

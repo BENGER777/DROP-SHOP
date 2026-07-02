@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="card-hover rounded-2xl p-8" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <div class="flex items-center space-x-4">
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" class="w-20 h-20 rounded-full object-cover border-3" style="border-color: var(--accent);">
+            {% else %}
+            <div class="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black" style="background: var(--accent);">{{ user.username[0] | upper }}</div>
+            {% endif %}
+            <div>
+                <h1 class="text-3xl font-black">@{{ user.username }}</h1>
+                <p style="color: var(--accent);">Бонусы: {{ user.points }} баллов</p>
+                {% if 'user_id' in session and session.user_id != user.id %}
+                    {% if is_friend %}
+                        <p class="text-sm">Вы в друзьях</p>
+                    {% else %}
+                        <a href="/add_friend/{{ user.id }}" class="text-sm text-[var(--accent)]">Добавить в друзья</a>
+                    {% endif %}
+                    <a href="/chat/{{ user.id }}" class="ml-4 text-sm text-[var(--accent)]">Написать</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4">Друзья</h2>
+        <div class="flex flex-wrap gap-3">
+            {% for friend in friends %}
+            <a href="/profile/{{ friend.id }}" class="flex items-center gap-2 card-hover p-2 rounded-xl">
+                <img src="{% if friend.avatar_url %}{{ friend.avatar_url }}{% else %}https://via.placeholder.com/30{% endif %}" class="w-8 h-8 rounded-full">
+                <span class="text-sm">@{{ friend.username }}</span>
+            </a>
+            {% endfor %}
+        </div>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4">Луки</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {% for post in posts %}
+            <div class="bg-black/20 rounded-xl overflow-hidden">
+                <img src="{% if post.image_url %}{{ post.image_url }}{% else %}https://via.placeholder.com/300{% endif %}" class="w-full h-48 object-cover">
+                <p class="p-3 text-sm">{{ post.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4">Покупки</h2>
+        {% for order in orders %}
+        <div class="bg-black/20 rounded-xl p-4 mb-3 flex justify-between items-center">
+            <div>
+                <p class="font-bold">{{ order.name }}</p>
+                <p class="text-sm opacity-50">{{ order.created_at }}</p>
+            </div>
+            <p class="text-xl font-bold">{{ order.final_price }} ₽</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

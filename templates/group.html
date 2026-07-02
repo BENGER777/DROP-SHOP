@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="card-hover rounded-2xl p-6" style="background: var(--card-bg); border: 1px solid var(--accent);">
+        <h1 class="text-3xl font-black gradient-text">Групповая покупка #{{ group.id }}</h1>
+        <p>Статус: {{ group.status }}</p>
+        <p>Скидка: <span class="font-bold text-[var(--accent)]">{{ discount }}%</span> (участников: {{ participants|length }})</p>
+        <p>Истекает: {{ group.expires_at[:10] }}</p>
+
+        <div class="mt-6">
+            <h2 class="text-xl font-bold">Участники</h2>
+            <div class="flex flex-wrap gap-2 mt-2">
+                {% for p in participants %}
+                <span class="px-3 py-1 rounded-full" style="background: var(--accent); color: white;">@{{ p.username }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-xl font-bold">Товары в группе</h2>
+            {% for item in items %}
+            <div class="flex justify-between items-center p-2 border-b border-[var(--border)]">
+                <span>{{ item.name }} (x{{ item.quantity }})</span>
+                <span>{{ item.price * item.quantity }} ₽</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if group.status == 'active' and session.user_id and not finished %}
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="font-bold mb-2">Добавить товар</h3>
+                <form action="/group/{{ group.id }}/add_item" method="POST" class="flex gap-2">
+                    <select name="product_id" class="flex-1 bg-black border border-[var(--border)] rounded px-3 py-2">
+                        <option value="1">Nike AF1 Original</option>
+                        <option value="2">Nike AF1 Replica</option>
+                        <option value="3">Balenciaga Hoodie Original</option>
+                        <option value="4">Balenciaga Hoodie Replica</option>
+                    </select>
+                    <input type="number" name="quantity" value="1" min="1" class="w-16 bg-black border border-[var(--border)] rounded px-2">
+                    <button type="submit" class="bg-[var(--accent)] px-4 py-2 rounded">+</button>
+                </form>
+            </div>
+            <div class="flex items-end">
+                <a href="/group/{{ group.id }}/finish" class="bg-[var(--accent)] text-white py-2 px-6 rounded-lg font-bold neon-btn">Завершить</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

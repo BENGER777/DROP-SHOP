@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Управление заказами</h1>
+    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-800">
+                    <th class="text-left p-4">ID</th>
+                    <th class="text-left p-4">Пользователь</th>
+                    <th class="text-left p-4">Товар</th>
+                    <th class="text-left p-4">Сумма</th>
+                    <th class="text-left p-4">Адрес</th>
+                    <th class="text-left p-4">Контакты</th>
+                    <th class="text-left p-4">Статус</th>
+                    <th class="text-left p-4">Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr class="border-b border-gray-800">
+                    <td class="p-4">{{ order.id }}</td>
+                    <td class="p-4">@{{ order.username }}</td>
+                    <td class="p-4">{{ order.name }}</td>
+                    <td class="p-4 font-bold">{{ order.final_price }} ₽</td>
+                    <td class="p-4">{{ order.address or '—' }}</td>
+                    <td class="p-4">{{ order.contact or '—' }}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded text-xs 
+                            {% if order.status == 'processing' %}bg-yellow-600
+                            {% elif order.status == 'shipped' %}bg-blue-600
+                            {% elif order.status == 'delivered' %}bg-green-600
+                            {% elif order.status == 'completed' %}bg-green-700
+                            {% else %}bg-gray-600{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <form method="POST" action="/admin/orders/status/{{ order.id }}" class="flex gap-1">
+                            <select name="status" class="bg-black border border-gray-700 rounded px-2 py-1 text-xs">
+                                <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Обрабатывается</option>
+                                <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Отправлен</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Доставлен</option>
+                                <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Завершён</option>
+                            </select>
+                            <button type="submit" class="bg-[var(--accent)] px-3 py-1 rounded text-xs">OK</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

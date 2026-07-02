@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Мой дашборд</h1>
+    
+    <!-- Карточки статистики -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="card-hover rounded-2xl p-6 text-center" style="background: var(--card-bg); border: 1px solid var(--border);">
+            <p class="text-4xl font-black">❤️ {{ total_likes }}</p>
+            <p class="text-sm opacity-70">Получено лайков</p>
+        </div>
+        <div class="card-hover rounded-2xl p-6 text-center" style="background: var(--card-bg); border: 1px solid var(--border);">
+            <p class="text-4xl font-black">📸 {{ total_posts }}</p>
+            <p class="text-sm opacity-70">Опубликовано луков</p>
+        </div>
+        <div class="card-hover rounded-2xl p-6 text-center" style="background: var(--card-bg); border: 1px solid var(--border);">
+            <p class="text-4xl font-black">🛍 {{ fav_category }}</p>
+            <p class="text-sm opacity-70">Любимая категория</p>
+        </div>
+    </div>
+    
+    <!-- График активности -->
+    <div class="card-hover rounded-2xl p-6 mb-8" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <h2 class="text-xl font-bold mb-4">Активность за 7 дней</h2>
+        <canvas id="activityChart" height="150"></canvas>
+    </div>
+    
+    <!-- Топ-3 лука -->
+    <h2 class="text-2xl font-bold mb-4">🏆 Топ-3 лука</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for post in top_posts %}
+        <a href="/post/{{ post.id }}" class="card-hover rounded-2xl overflow-hidden" style="background: var(--card-bg); border: 1px solid var(--border);">
+            <img src="{% if post.image_url %}{{ post.image_url }}{% else %}https://via.placeholder.com/400x300/1a1a1a/fff?text=DROP{% endif %}" class="w-full h-48 object-cover">
+            <div class="p-4">
+                <p class="text-sm">{{ post.description[:60] }}</p>
+                <p class="text-lg font-black mt-2">❤️ {{ post.likes_count }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const days = {{ activity_days | safe }};
+    const counts = {{ activity_counts | safe }};
+    new Chart(document.getElementById('activityChart'), {
+        type: 'line',
+        data: {
+            labels: days,
+            datasets: [{
+                label: 'Постов',
+                data: counts,
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59,130,246,0.2)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#aaa' } },
+                x: { ticks: { color: '#aaa' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

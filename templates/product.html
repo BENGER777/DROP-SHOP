@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="card-hover rounded-2xl p-8" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="h-80 flex items-center justify-center rounded-xl overflow-hidden">
+                {% if product.video_url %}
+                <video src="{{ product.video_url }}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
+                {% elif product.image_url %}
+                <img src="{{ product.image_url }}" class="w-full h-full object-cover">
+                {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-8xl">
+                    {{ '👟' if 'кроссовк' in product.name.lower() or 'jordan' in product.name.lower() else '👕' }}
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                <span class="px-3 py-1 rounded-full text-sm {% if product.type == 'original' %}bg-yellow-600{% else %}bg-green-600{% endif %}">
+                    {{ 'Оригинал' if product.type == 'original' else 'Реплика' }}
+                </span>
+                <h1 class="text-3xl font-black mt-4">{{ product.name }}</h1>
+                <div class="flex items-center mt-3">
+                    <div class="flex text-yellow-400 text-xl">
+                        {% for i in range(5) %}
+                            {% if i < avg_rating|round(0, 'floor') %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="ml-2 text-gray-400">{{ avg_rating }} ({{ review_count }} отзывов)</span>
+                </div>
+                
+                <!-- Цена с учётом акции -->
+                {% if promo %}
+                <p class="mt-4">
+                    <span class="text-2xl font-black line-through opacity-50">{{ product.price }} ₽</span>
+                    <span class="text-4xl font-black gradient-text ml-2">{{ (product.price * (1 - promo.discount_percent/100))|round(0) }} ₽</span>
+                    <span class="text-sm text-[var(--accent)] ml-2">-{{ promo.discount_percent }}%</span>
+                </p>
+                <p class="text-xs text-gray-400 mt-1">🔥 Акция «{{ promo.title }}» до {{ promo.end_date[:10] }}</p>
+                {% else %}
+                <p class="text-4xl font-black mt-4 gradient-text">{{ product.price }} ₽</p>
+                {% endif %}
+                
+                <p class="text-gray-400 mt-4">{{ product.description }}</p>
+                <p class="text-sm mt-2">В наличии: {{ product.stock }} шт.</p>
+                
+                {% if session.user_id %}
+                <div class="mt-6 space-y-3">
+                    <a href="/add_to_cart/{{ product.id }}" 
+                       class="block w-full bg-gray-700 text-center py-3 rounded-lg font-bold hover:bg-gray-600 transition"
+                       @click="$dispatch('cart-added')">
+                        🛒 В корзину
+                    </a>
+                    <a href="/wishlist/add/{{ product.id }}" class="block w-full bg-gray-700 text-center py-3 rounded-lg font-bold hover:bg-gray-600 transition">
+                        ❤️ В желаемое
+                    </a>
+                    <button onclick="openAR('{{ product.image_url if product.image_url else 'https://via.placeholder.com/400.png?text=Shoe' }}')"
+                            class="block w-full bg-[var(--accent)] text-center py-3 rounded-lg font-bold neon-btn transition">
+                        👟 Примерка AR
+                    </button>
+                    <a href="/group/start/{{ product.id }}" class="block w-full bg-gray-600 text-center py-3 rounded-lg font-bold hover:bg-gray-500 transition">
+                        🔥 В групповую покупку
+                    </a>
+                </div>
+                {% else %}
+                <p class="mt-6 text-center"><a href="/login" class="text-[var(--accent)]">Войдите</a>, чтобы купить</p>
+                {% endif %}
+                
+                {% if active_gb %}
+                <div class="mt-6 bg-[var(--accent)]/10 rounded-xl p-4">
+                    <p class="font-bold">Активные групповые покупки:</p>
+                    {% for gb in active_gb %}
+                    <a href="/group/{{ gb.id }}" class="block mt-2 text-[var(--accent)] hover:underline">
+                        👥 Группа #{{ gb.id }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Отзывы -->
+        <div class="mt-10 border-t border-[var(--border)] pt-8">
+            <h2 class="text-2xl font-bold mb-4">Оставить отзыв</h2>
+            {% if session.user_id %}
+            <form method="POST" action="/add_review/{{ product.id }}" class="bg-black/20 rounded-xl p-6 mb-8">
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Ваша оценка</label>
+                    <div class="flex space-x-1 text-2xl" id="star-rating">
+                        {% for i in range(1, 6) %}
+                        <label class="cursor-pointer text-gray-500 hover:text-yellow-400 transition star-label" data-value="{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="rating" id="rating-input" value="5">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Ваш отзыв (необязательно)</label>
+                    <textarea name="content" rows="3" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3"></textarea>
+                </div>
+                <button type="submit" class="bg-[var(--accent)] px-6 py-3 rounded-lg font-bold hover:opacity-90 transition">Отправить</button>
+            </form>
+            <script>
+                document.querySelectorAll('.star-label').forEach(star => {
+                    star.addEventListener('click', function() {
+                        let value = this.getAttribute('data-value');
+                        document.getElementById('rating-input').value = value;
+                        document.querySelectorAll('.star-label').forEach((s, index) => {
+                            if (index < value) {
+                                s.classList.add('text-yellow-400');
+                                s.classList.remove('text-gray-500');
+                            } else {
+                                s.classList.remove('text-yellow-400');
+                                s.classList.add('text-gray-500');
+                            }
+                        });
+                    });
+                });
+                document.querySelectorAll('.star-label').forEach((s, index) => {
+                    if (index < 5) s.classList.add('text-yellow-400');
+                });
+            </script>
+            {% else %}
+            <p class="text-gray-400 mb-8"><a href="/login" class="text-[var(--accent)]">Войдите</a>, чтобы оставить отзыв.</p>
+            {% endif %}
+
+            <h2 class="text-2xl font-bold mb-6">Отзывы ({{ review_count }})</h2>
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="bg-black/20 rounded-xl p-4 mb-4">
+                    <div class="flex items-center space-x-3">
+                        {% if review.avatar_url %}
+                        <img src="{{ review.avatar_url }}" class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                        <div class="w-8 h-8 bg-[var(--accent)] rounded-full flex items-center justify-center text-sm font-bold">
+                            {{ review.username[0] | upper }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <span class="text-[var(--accent)] font-semibold">@{{ review.username }}</span>
+                            <span class="text-yellow-400 ml-2">
+                                {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+                            </span>
+                            <span class="text-gray-500 text-sm ml-2">{{ review.created_at[:10] }}</span>
+                        </div>
+                    </div>
+                    {% if review.content %}
+                    <p class="mt-2 text-gray-300">{{ review.content }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-500">Пока нет отзывов.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

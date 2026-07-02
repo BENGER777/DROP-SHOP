@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">{% if promo %}Редактировать акцию{% else %}Новая акция{% endif %}</h1>
+    <form method="POST" class="card-hover rounded-2xl p-6" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <input type="text" name="title" value="{{ promo.title if promo else '' }}" placeholder="Название" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">
+        <textarea name="description" rows="2" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">{{ promo.description if promo else '' }}</textarea>
+        <input type="number" name="discount" step="0.1" value="{{ promo.discount_percent if promo else '' }}" placeholder="Скидка %" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">
+        <select name="product_id" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">
+            <option value="">Все товары</option>
+            {% for p in products %}
+            <option value="{{ p.id }}" {% if promo and promo.product_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+        </select>
+        <label>Дата начала</label>
+        <input type="datetime-local" name="start_date" value="{{ promo.start_date if promo else '' }}" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">
+        <label>Дата окончания</label>
+        <input type="datetime-local" name="end_date" value="{{ promo.end_date if promo else '' }}" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 mb-4">
+        {% if promo %}
+        <label class="flex items-center gap-2 mb-4"><input type="checkbox" name="active" value="1" {% if promo.active %}checked{% endif %}> Активна</label>
+        {% endif %}
+        <button type="submit" class="w-full bg-[var(--accent)] py-3 rounded-lg font-bold">Сохранить</button>
+    </form>
+</div>
+{% endblock %}

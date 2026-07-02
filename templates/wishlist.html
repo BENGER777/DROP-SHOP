@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">❤️ Список желаемого</h1>
+    {% if items %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for item in items %}
+        <div class="card-hover rounded-2xl p-4" style="background: var(--card-bg); border: 1px solid var(--border);">
+            {% if item.image_url %}
+            <img src="{{ item.image_url }}" class="w-full h-48 object-cover rounded-lg mb-4">
+            {% else %}
+            <div class="h-48 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center text-4xl mb-4">
+                {{ '👟' if 'кроссовк' in item.name.lower() or 'jordan' in item.name.lower() else '👕' }}
+            </div>
+            {% endif %}
+            <h3 class="font-bold">{{ item.name }}</h3>
+            <p class="text-lg font-black">{{ item.price }} ₽</p>
+            <div class="flex gap-2 mt-4">
+                <a href="/product/{{ item.product_id }}" class="flex-1 bg-gray-800 text-center py-2 rounded-lg text-sm">Подробнее</a>
+                <a href="/wishlist/remove/{{ item.product_id }}" class="bg-red-600 px-3 py-2 rounded-lg text-sm">✕</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-400">Ваш вишлист пуст. Добавляйте товары из <a href="/shop" class="text-[var(--accent)]">магазина</a>!</p>
+    {% endif %}
+</div>
+{% endblock %}

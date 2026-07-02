@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Мои заказы</h1>
+    {% for order in orders %}
+    <div class="card-hover rounded-2xl p-4 mb-4" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="font-bold">{{ order.name }}</p>
+                <p class="text-sm opacity-70">{{ order.created_at }}</p>
+                {% if order.address %}
+                <p class="text-sm mt-1">📍 {{ order.address }}</p>
+                {% endif %}
+                {% if order.contact %}
+                <p class="text-sm">📞 {{ order.contact }}</p>
+                {% endif %}
+                {% if order.comment %}
+                <p class="text-sm italic">💬 {{ order.comment }}</p>
+                {% endif %}
+            </div>
+            <div class="text-right">
+                <p class="text-xl font-bold">{{ order.final_price }} ₽</p>
+                <span class="text-xs px-2 py-1 rounded {% if order.status == 'completed' %}bg-green-600{% elif order.status == 'processing' %}bg-yellow-600{% else %}bg-gray-600{% endif %}">
+                    {{ order.status }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

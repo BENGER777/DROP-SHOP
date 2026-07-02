@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Реферальная программа</h1>
+    
+    <div class="card-hover rounded-2xl p-6 mb-8" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <p class="text-xl font-bold mb-2">Ваша реферальная ссылка</p>
+        <div class="flex items-center gap-2">
+            <input type="text" readonly value="http://127.0.0.1:5000/register?ref={{ user.referral_code }}" 
+                   class="flex-1 bg-black border border-[var(--border)] rounded-lg px-4 py-3 text-sm">
+            <button onclick="copyRef()" class="bg-[var(--accent)] text-white px-4 py-3 rounded-lg">Копировать</button>
+        </div>
+        <p class="text-sm mt-2 opacity-70">Поделитесь ссылкой с друзьями. За каждого, кто зарегистрируется и сделает первую покупку, вы получите 500 бонусных баллов!</p>
+    </div>
+    
+    <div class="card-hover rounded-2xl p-6 mb-8" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <h2 class="text-xl font-bold mb-4">Ваши бонусы</h2>
+        <p class="text-3xl font-black">{{ total_bonus }} баллов</p>
+    </div>
+    
+    <h2 class="text-2xl font-bold mb-4">Приглашённые пользователи</h2>
+    {% if invited %}
+    <div class="space-y-3">
+        {% for u in invited %}
+        <div class="card-hover rounded-xl p-4 flex items-center gap-4" style="background: var(--card-bg); border: 1px solid var(--border);">
+            <div class="w-10 h-10 bg-[var(--accent)] rounded-full flex items-center justify-center font-bold">@</div>
+            <div class="flex-1">
+                <p class="font-bold">@{{ u.username }}</p>
+                <p class="text-sm opacity-70">Присоединился {{ u.created_at[:10] }}</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full {% if u.bonus_paid %}bg-green-600{% else %}bg-gray-600{% endif %}">
+                {% if u.bonus_paid %}Бонус начислен{% else %}Ожидает покупки{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="opacity-50">Вы пока никого не пригласили.</p>
+    {% endif %}
+</div>
+
+<script>
+    function copyRef() {
+        const input = document.querySelector('input[readonly]');
+        input.select();
+        document.execCommand('copy');
+        alert('Ссылка скопирована!');
+    }
+</script>
+{% endblock %}

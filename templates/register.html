@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-20">
+    <h1 class="text-4xl font-black mb-8 gradient-text text-center">Регистрация</h1>
+    <form method="POST" class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Имя пользователя</label>
+            <input type="text" name="username" required class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition">
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm mb-2">Пароль</label>
+            <input type="password" name="password" required class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition">
+        </div>
+        <button type="submit" class="w-full bg-purple-600 py-3 rounded-lg font-bold hover:bg-purple-700 neon-btn transition">Зарегистрироваться</button>
+        <p class="text-center mt-4 text-sm text-gray-400">Уже есть аккаунт? <a href="/login" class="text-purple-400">Войти</a></p>
+    </form>
+</div>
+{% endblock %}

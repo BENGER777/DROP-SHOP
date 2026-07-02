@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Беседы</h1>
+    <form action="/create_conversation" method="POST" class="mb-8">
+        <p class="mb-2">Выберите друзей для беседы:</p>
+        <div class="space-y-2 max-h-40 overflow-y-auto mb-4">
+            {% for friend in friends %}
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="participants" value="{{ friend.id }}">
+                @{{ friend.username }}
+            </label>
+            {% endfor %}
+        </div>
+        <button type="submit" class="bg-[var(--accent)] px-4 py-2 rounded-lg font-bold">Создать</button>
+    </form>
+    <div class="space-y-3">
+        {% for conv in convs %}
+        <a href="/conversation/{{ conv.id }}" class="block card-hover p-4 rounded-xl">
+            Беседа {{ conv.id }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

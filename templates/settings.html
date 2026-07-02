@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-20">
+    <h1 class="text-4xl font-black mb-8 gradient-text text-center">Настройки профиля</h1>
+    
+    <div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+        <!-- Текущий аватар -->
+        <div class="flex flex-col items-center mb-8">
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="Аватар" class="w-32 h-32 rounded-full object-cover border-4 border-purple-600">
+            {% else %}
+            <div class="w-32 h-32 bg-purple-600 rounded-full flex items-center justify-center text-5xl font-black">
+                {{ user.username[0] | upper }}
+            </div>
+            {% endif %}
+            <p class="text-2xl font-bold mt-4">@{{ user.username }}</p>
+            <p class="text-purple-400">Бонусы: {{ user.points }}</p>
+        </div>
+        
+        <!-- Форма загрузки аватара -->
+        <form method="POST" enctype="multipart/form-data">
+            <label class="block text-sm mb-2">Загрузить новый аватар</label>
+            <input type="file" name="avatar" accept="image/*" 
+                   class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700">
+            <p class="text-xs text-gray-500 mt-2">PNG, JPG, GIF, WEBP до 16 МБ</p>
+            
+            <button type="submit" class="w-full mt-6 bg-purple-600 py-3 rounded-lg font-bold hover:bg-purple-700 neon-btn transition">
+                Сохранить
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
