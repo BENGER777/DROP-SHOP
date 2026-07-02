@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">
+        {% if product %}Редактировать товар{% else %}Добавить товар{% endif %}
+    </h1>
+    <form method="POST" enctype="multipart/form-data" class="card-hover rounded-2xl p-6" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Название</label>
+            <input type="text" name="name" value="{{ product.name if product else '' }}" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Тип</label>
+            <select name="type" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3">
+                <option value="original" {% if product and product.type == 'original' %}selected{% endif %}>Оригинал</option>
+                <option value="replica" {% if product and product.type == 'replica' %}selected{% endif %}>Реплика</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Цена (₽)</label>
+            <input type="number" name="price" step="0.01" value="{{ product.price if product else '' }}" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm mb-2">В наличии (шт.)</label>
+            <input type="number" name="stock" value="{{ product.stock if product else 0 }}" required class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Описание</label>
+            <textarea name="description" rows="3" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3">{{ product.description if product else '' }}</textarea>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Фото товара</label>
+            {% if product and product.image_url %}
+            <img src="{{ product.image_url }}" class="w-32 h-32 object-cover rounded-lg mb-2">
+            {% endif %}
+            <input type="file" name="photo" accept="image/*" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--accent)] file:text-white">
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm mb-2">Видео товара (mp4, webm)</label>
+            {% if product and product.video_url %}
+            <video src="{{ product.video_url }}" controls class="w-full h-32 object-cover rounded-lg mb-2"></video>
+            {% endif %}
+            <input type="file" name="video" accept="video/*" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3 text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--accent)] file:text-white">
+        </div>
+        <button type="submit" class="w-full bg-[var(--accent)] py-3 rounded-lg font-bold neon-btn">
+            {% if product %}Сохранить изменения{% else %}Добавить товар{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}

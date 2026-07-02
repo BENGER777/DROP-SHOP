@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Друзья</h1>
+    <form action="/search_friends" method="GET" class="flex gap-2 mb-8">
+        <input type="text" name="q" placeholder="Поиск по имени" class="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg px-4 py-3">
+        <button type="submit" class="bg-[var(--accent)] px-6 py-3 rounded-lg font-bold">Найти</button>
+    </form>
+    {% if incoming %}
+    <h2 class="text-xl font-bold mb-4">Входящие заявки</h2>
+    {% for user in incoming %}
+    <div class="flex items-center gap-4 mb-4 card-hover p-3 rounded-xl">
+        <img src="{% if user.avatar_url %}{{ user.avatar_url }}{% else %}https://via.placeholder.com/40{% endif %}" class="w-10 h-10 rounded-full">
+        <span>@{{ user.username }}</span>
+        <a href="/accept_friend/{{ user.req_id }}" class="ml-auto text-[var(--accent)]">Принять</a>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <h2 class="text-xl font-bold mb-4">Ваши друзья</h2>
+    {% for friend in friends %}
+    <div class="flex items-center gap-4 mb-4 card-hover p-3 rounded-xl">
+        <img src="{% if friend.avatar_url %}{{ friend.avatar_url }}{% else %}https://via.placeholder.com/40{% endif %}" class="w-10 h-10 rounded-full">
+        <a href="/profile/{{ friend.id }}">@{{ friend.username }}</a>
+        <a href="/remove_friend/{{ friend.id }}" class="ml-auto text-red-400" onclick="return confirm('Удалить друга?')">Удалить</a>
+        <a href="/chat/{{ friend.id }}" class="text-[var(--accent)]">Написать</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-20">
+    <h1 class="text-4xl font-black mb-8 gradient-text text-center">Новый лук</h1>
+    <form method="POST" enctype="multipart/form-data" class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+        
+        <!-- Загрузка фото с устройства -->
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Загрузить фото с устройства</label>
+            <input type="file" name="photo" accept="image/*" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700">
+            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF, WEBP до 16 МБ</p>
+        </div>
+        
+        <!-- ИЛИ ссылка на фото -->
+        <div class="mb-4">
+            <label class="block text-sm mb-2">Или вставьте ссылку на фото</label>
+            <input type="text" name="image_url" placeholder="https://example.com/photo.jpg" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition">
+        </div>
+        
+        <!-- Описание -->
+        <div class="mb-6">
+            <label class="block text-sm mb-2">Описание</label>
+            <textarea name="description" rows="3" placeholder="Опиши свой лук..." class="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 focus:border-purple-500 outline-none transition"></textarea>
+        </div>
+        
+        <button type="submit" class="w-full bg-purple-600 py-3 rounded-lg font-bold hover:bg-purple-700 neon-btn transition">
+            Опубликовать лук
+        </button>
+    </form>
+</div>
+{% endblock %}

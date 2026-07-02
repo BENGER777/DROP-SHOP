@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-8">
+    <div class="card-hover rounded-2xl overflow-hidden relative" style="background: var(--card-bg); border: 1px solid var(--border);" id="story-container">
+        {% for story in stories %}
+        <div class="story-slide {% if loop.first %}active{% else %}hidden{% endif %}" data-index="{{ loop.index0 }}">
+            <div class="p-4 flex items-center gap-3">
+                {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" class="w-10 h-10 rounded-full">
+                {% else %}
+                <div class="w-10 h-10 bg-[var(--accent)] rounded-full flex items-center justify-center">{{ user.username[0]|upper }}</div>
+                {% endif %}
+                <span class="font-bold">@{{ user.username }}</span>
+            </div>
+            {% if story.video_url %}
+            <video src="{{ story.video_url }}" controls autoplay class="w-full max-h-96 object-cover"></video>
+            {% elif story.image_url %}
+            <img src="{{ story.image_url }}" class="w-full max-h-96 object-cover">
+            {% endif %}
+        </div>
+        {% endfor %}
+        <!-- Кнопки навигации -->
+        <button id="prev-story" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl">‹</button>
+        <button id="next-story" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl">›</button>
+    </div>
+    <div class="flex justify-center gap-2 mt-4">
+        {% for story in stories %}
+        <div class="h-1 flex-1 rounded-full bg-gray-600 story-progress" data-index="{{ loop.index0 }}">
+            <div class="h-full bg-[var(--accent)] rounded-full" style="width: 0%;" id="progress-{{ loop.index0 }}"></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const slides = document.querySelectorAll('.story-slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('hidden', i !== index);
+            slide.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
+    }
+
+    document.getElementById('next-story').addEventListener('click', () => {
+        if (currentSlide < totalSlides - 1) {
+            showSlide(currentSlide + 1);
+        }
+    });
+
+    document.getElementById('prev-story').addEventListener('click', () => {
+        if (currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        }
+    });
+
+    // Автопереключение через 5 секунд (как в Instagram)
+    let progressInterval;
+    function startProgress() {
+        const progressBar = document.getElementById('progress-' + currentSlide);
+        let width = 0;
+        clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            width += 1;
+            progressBar.style.width = width + '%';
+            if (width >= 100) {
+                clearInterval(progressInterval);
+                if (currentSlide < totalSlides - 1) {
+                    showSlide(currentSlide + 1);
+                    startProgress();
+                }
+            }
+        }, 50);
+    }
+    startProgress();
+
+    // При смене слайда перезапускаем прогресс
+    document.addEventListener('slideChanged', () => {
+        document.querySelectorAll('.story-progress div').forEach(div => div.style.width = '0%');
+        startProgress();
+    });
+
+    // Простой способ вызвать событие при смене (можно улучшить)
+    const originalShow = showSlide;
+    showSlide = function(index) {
+        originalShow(index);
+        document.dispatchEvent(new Event('slideChanged'));
+    };
+</script>
+{% endblock %}

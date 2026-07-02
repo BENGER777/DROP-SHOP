@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="card-hover rounded-2xl overflow-hidden" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <img src="{% if post.image_url %}{{ post.image_url }}{% else %}https://via.placeholder.com/600x400/1a1a1a/fff?text=DROP{% endif %}" 
+             alt="Лук" class="w-full h-96 object-cover">
+        <div class="p-6">
+            <a href="/profile/{{ post.user_id }}" class="text-[var(--accent)] hover:underline">@{{ post.username }}</a>
+            {% if session.user_id == post.user_id %}
+            <div class="mt-2 flex gap-2">
+                <a href="/edit_post/{{ post.id }}" class="text-sm text-gray-400 hover:text-[var(--accent)]">✏️</a>
+                <a href="/delete_post/{{ post.id }}" class="text-sm text-red-400 hover:text-red-300" onclick="return confirm('Удалить пост?')">🗑️</a>
+            </div>
+            {% endif %}
+            <p class="mt-2 text-lg">{{ post.description }}</p>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="text-xl">
+                    {% if session.user_id %}
+                        <span class="cursor-pointer hover:scale-110 transition" 
+                              hx-post="/like/{{ post.id }}" 
+                              hx-target="this" 
+                              hx-swap="outerHTML">
+                            🤍 {{ likes_count }}
+                        </span>
+                    {% else %}
+                        <span class="text-gray-500">🤍 {{ likes_count }}</span>
+                    {% endif %}
+                </div>
+				{% if session.user_id %}
+<span class="cursor-pointer hover:scale-110 transition" hx-post="/bookmark/{{ post.id }}" hx-target="this" hx-swap="outerHTML">
+    📑 0
+</span>
+<a href="/report/{{ post.id }}" class="text-gray-400 hover:text-red-400 transition">⚑</a>
+{% endif %}
+                <!-- Кнопки шаринга -->
+                <div class="flex gap-2 text-sm">
+                    <button onclick="sharePost('telegram')" class="bg-blue-500 text-white px-3 py-1 rounded-lg">📱 Telegram</button>
+                    <button onclick="sharePost('whatsapp')" class="bg-green-500 text-white px-3 py-1 rounded-lg">💬 WhatsApp</button>
+                    <button onclick="copyPostLink()" class="bg-gray-600 text-white px-3 py-1 rounded-lg">📋 Копировать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Комментарии -->
+    <div class="mt-8 card-hover rounded-2xl p-6" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <h2 class="text-2xl font-bold mb-6">Комментарии ({{ comments|length }})</h2>
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="flex space-x-3 py-3 border-b border-[var(--border)]">
+                <div class="w-8 h-8 bg-[var(--accent)] rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                    {{ comment.username[0] | upper }}
+                </div>
+                <div>
+                    <p class="text-sm">
+                        <span class="text-[var(--accent)] font-semibold">@{{ comment.username }}</span>
+                        <span class="text-gray-500 ml-2">{{ comment.created_at[:10] }}</span>
+                    </p>
+                    <p class="mt-1">{{ comment.content }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-500">Пока нет комментариев. Будь первым!</p>
+        {% endif %}
+        {% if session.user_id %}
+        <form method="POST" action="/add_comment/{{ post.id }}" class="mt-6 flex gap-2">
+            <input type="text" name="content" required placeholder="Написать комментарий..." 
+                   class="flex-1 bg-black border border-[var(--border)] rounded-lg px-4 py-3">
+            <button type="submit" class="bg-[var(--accent)] px-6 py-3 rounded-lg font-bold">Отправить</button>
+        </form>
+        {% else %}
+        <p class="mt-6 text-center text-gray-500"><a href="/login" class="text-[var(--accent)]">Войдите</a>, чтобы комментировать</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const postUrl = window.location.href;
+    const postText = `Посмотри этот лук в DROP SHOP: ${postUrl}`;
+    
+    function sharePost(platform) {
+        let url = '';
+        if (platform === 'telegram') {
+            url = `https://t.me/share/url?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postText)}`;
+        } else if (platform === 'whatsapp') {
+            url = `https://wa.me/?text=${encodeURIComponent(postText)}`;
+        }
+        if (url) window.open(url, '_blank');
+    }
+    
+    function copyPostLink() {
+        navigator.clipboard.writeText(postUrl).then(() => {
+            alert('Ссылка скопирована!');
+        });
+    }
+</script>
+{% endblock %}

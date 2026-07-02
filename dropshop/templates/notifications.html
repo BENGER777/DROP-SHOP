@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black mb-8 gradient-text">Уведомления</h1>
+    
+    {% if notifications %}
+        <div class="space-y-3">
+            {% for notif in notifications %}
+            <a href="/notifications/read/{{ notif.id }}" class="block bg-gray-900 rounded-xl p-4 border {% if notif.is_read == 0 %}border-purple-500/50 bg-purple-900/20{% else %}border-gray-800{% endif %} transition hover:bg-gray-800">
+                <p class="text-white">{{ notif.content }}</p>
+                <p class="text-xs text-gray-400 mt-2">{{ notif.created_at[:10] }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-20">
+            <p class="text-6xl mb-4">🔔</p>
+            <p class="text-2xl font-bold">Уведомлений пока нет</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

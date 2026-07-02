@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-20">
+    <h1 class="text-4xl font-black mb-8 gradient-text text-center">Пожаловаться на пост</h1>
+    <form method="POST" class="card-hover rounded-2xl p-6" style="background: var(--card-bg); border: 1px solid var(--border);">
+        <textarea name="reason" rows="4" class="w-full bg-black border border-[var(--border)] rounded-lg px-4 py-3" placeholder="Опишите причину..."></textarea>
+        <button type="submit" class="w-full bg-[var(--accent)] py-3 rounded-lg font-bold mt-4">Отправить</button>
+    </form>
+</div>
+{% endblock %}

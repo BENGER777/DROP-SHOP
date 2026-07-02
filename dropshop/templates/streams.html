@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-black gradient-text">Эфиры</h1>
+        <a href="/stream/create" class="bg-[var(--accent)] px-6 py-3 rounded-lg font-bold">+ Создать</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for stream in streams %}
+        <a href="/stream/{{ stream.id }}" class="card-hover rounded-2xl overflow-hidden" style="background: var(--card-bg); border: 1px solid var(--border);">
+            {% if stream.video_url %}
+            <video src="{{ stream.video_url }}" class="w-full h-48 object-cover"></video>
+            {% else %}
+            <div class="h-48 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-4xl">🎥</div>
+            {% endif %}
+            <div class="p-4">
+                <h3 class="font-bold">{{ stream.title }}</h3>
+                <p class="text-sm opacity-70">@{{ stream.username }}</p>
+                <span class="text-xs px-2 py-1 rounded-full {% if stream.is_live %}bg-red-600 animate-pulse{% else %}bg-gray-600{% endif %}">
+                    {{ 'LIVE' if stream.is_live else 'Запись' }}
+                </span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
